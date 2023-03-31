@@ -21,11 +21,13 @@ include_directories(BEFORE src)
 set(TCP_INCLUDE_FILES
         include/tcp_client.h
         include/tcp_server.h
-        include/tcp_socket.h)
+        include/tcp_socket.h
+        include/tcp_handler.h)
 set(TCP_SOURCE_FILES
         src/tcp_server.cpp
         src/tcp_client.cpp
-        src/tcp_socket.cpp)
+        src/tcp_socket.cpp
+        src/tcp_handler.cpp)
 
 add_library(tcp
         ${TCP_INCLUDE_FILES}

@@ -2,34 +2,6 @@
 
 namespace tcp {
 
-/** TcpHandler **/
-
-void TcpHandler::StartWorking() {
-    std::string recv_msg;
-    std::string reply_msg;
-    int reply_size = 0;
-    while (true) {
-        int n_read = socket_->Read(&recv_msg);
-        if (n_read == 0) {
-            spdlog::debug("Client closed connection. ");
-            break;
-        } else if (n_read < 0) {
-            spdlog::warn("Failed to receive data. ");
-            break;
-        }
-        spdlog::debug("[{}:{}:{} Bytes]: {}", client_ip_, client_port_, n_read, recv_msg);
-
-        func_(recv_msg, reply_msg);
-        int n_reply = socket_->Write(reply_msg);
-        if (n_reply < 0) {
-            spdlog::warn("Failed to reply. ");
-            break;
-        }
-    }
-    socket_->Close();
-}
-
-
 /** TcpServer **/
 
 bool TcpServer::Start() {
@@ -109,7 +81,6 @@ TcpServer::~TcpServer() {
     if (main_thread_.joinable()) {
         main_thread_.join();
     }
-    spdlog::info("{} closed", name_);
     Close();
 }
 
@@ -117,7 +88,7 @@ bool TcpServer::IsRunning() {
     return is_running_.load(std::memory_order_relaxed);
 }
 
-void TcpServer::RegisterAction(std::function<void(const std::string &, std::string &)> func) {
+void TcpServer::HandleReceiveData(std::function<void(const std::string &, std::string &)> func) {
     func_ = func;
 }
 
@@ -126,6 +97,7 @@ void TcpServer::stop() {
     is_running_.store(false, std::memory_order_release);
     if (server_fd_ > 0){
         close(server_fd_);
+        spdlog::info("{} closed", name_);
     }
 }
 

@@ -10,35 +10,12 @@
 #include <functional>
 
 #include "tcp_socket.h"
+#include "tcp_handler.h"
 
 namespace tcp {
 
-using HandlerFunc = std::function<void(const std::string &, std::string &)>;
-const HandlerFunc default_func = [](const std::string &recv, std::string &reply){ reply = recv; };
 
-class TcpHandler {
-private:
-    HandlerFunc func_;
-    std::shared_ptr<TcpSocket> socket_;     // 和客户端通信
-    std::string client_ip_;
-    uint16_t client_port_;
-
-public:
-    explicit TcpHandler(
-        std::shared_ptr<TcpSocket> socket,
-        const char *ip, uint16_t port,
-        HandlerFunc func)
-            : socket_(socket), client_ip_(ip), client_port_(port), func_(func) {
-
-    }
-
-    virtual ~TcpHandler() {}
-    void StartWorking();
-
-};
-
-
-class TcpServer {
+class TcpServer: public std::enable_shared_from_this<TcpServer> {
 
 protected:
     std::string name_;
@@ -56,10 +33,10 @@ public:
 
     virtual ~TcpServer();
 
-    bool Start();
+    virtual bool Start();
     bool IsRunning();
 
-    void RegisterAction(HandlerFunc func);
+    void HandleReceiveData(HandlerFunc func);
 
     bool Close();
 

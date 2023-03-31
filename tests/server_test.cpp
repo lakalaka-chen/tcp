@@ -16,7 +16,7 @@ public:
     static const uint16_t port = 1234;
     EchoTwiceHandlerTest(): server_(new TcpServer("Echo Twice Server", EchoTwiceHandlerTest::port)) {
         spdlog::set_level(spdlog::level::debug);
-        server_->RegisterAction([](const std::string &recv_msg, std::string &reply_msg){
+        server_->HandleReceiveData([](const std::string &recv_msg, std::string &reply_msg){
             reply_msg = recv_msg + " " + recv_msg;
         });
         server_->Start();
@@ -43,7 +43,7 @@ public:
     static const uint16_t port = 8888;
     Double2ServerTest(): server_(new TcpServer("Echo Twice Server", Double2ServerTest::port)) {
         spdlog::set_level(spdlog::level::debug);
-        server_->RegisterAction([](const std::string &recv_msg, std::string &reply_msg){
+        server_->HandleReceiveData([](const std::string &recv_msg, std::string &reply_msg){
             int num = std::stoi(recv_msg);
             reply_msg = std::string(std::to_string(2*num));
         });
@@ -177,7 +177,7 @@ TEST(RawServerTest, SimpleTest) {
 
 TEST(MultiClientTest, Test1) {
     spdlog::set_level(spdlog::level::debug);
-    TcpServer server("Simple", 9999);
+    TcpServer server("Simple", 6666);
     server.Start();
 
     if (!server.IsRunning()) {
@@ -191,7 +191,7 @@ TEST(MultiClientTest, Test1) {
     for (int i = 0; i < 100; i ++) {
         std::thread client_thread([&](){
             TcpClient client;
-            client.ConnectTo("127.0.0.1", 9999);
+            client.ConnectTo("127.0.0.1", 6666);
             std::string send_msg = std::to_string(i);
             std::string recv_msg;
             client.SendMsg(send_msg);

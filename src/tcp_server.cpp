@@ -78,10 +78,10 @@ TcpServer::TcpServer(std::string name, uint16_t port, size_t capacity)
 
 
 TcpServer::~TcpServer() {
+    Close();
     if (main_thread_.joinable()) {
         main_thread_.join();
     }
-    Close();
 }
 
 bool TcpServer::IsRunning() {

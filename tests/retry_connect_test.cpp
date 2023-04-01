@@ -46,8 +46,7 @@ TEST(RetryConnect, TEST1) {
         trigger.join();
     }
 
-    TcpServerPtr server_ptr = server_ptr_future.get();
-    server_ptr->Close();
+//    TcpServerPtr server_ptr = server_ptr_future.get();
+//    server_ptr->Close();
 
-//    spdlog::info("server use count= {}", server_ptr.use_count());
 }

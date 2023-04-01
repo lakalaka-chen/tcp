@@ -4,8 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 include(GoogleTest)
 
 file(GLOB_RECURSE TCP_TEST_SOURCES
-        "${PROJECT_SOURCE_DIR}/tests/client_test.cpp"
-        "${PROJECT_SOURCE_DIR}/tests/server_test.cpp")
+        "${PROJECT_SOURCE_DIR}/tests/*_test.cpp")
 #
 foreach(test_source ${TCP_TEST_SOURCES})
     get_filename_component(test_filename ${test_source} NAME)

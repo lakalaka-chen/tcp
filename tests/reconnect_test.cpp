@@ -13,7 +13,7 @@ using namespace tcp;
 TEST(ReConnectTest, ClientEnd) {
 
     spdlog::set_level(spdlog::level::debug);
-    uint16_t port = 12345;
+    uint16_t port = 23456;
 
     std::atomic<bool> to_start{false};
 
@@ -39,6 +39,9 @@ TEST(ReConnectTest, ClientEnd) {
     std::string send_msg, recv_msg;
     std::cout << "Input: ";
     while (std::cin >> send_msg) {
+        if (send_msg == "QUIT") {
+            break;
+        }
         if (!client.SendMsg(send_msg)) break;
         if (!client.RecvMsg(&recv_msg)) break;
         spdlog::info("Receive: {}", recv_msg);

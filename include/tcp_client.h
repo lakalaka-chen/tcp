@@ -16,6 +16,7 @@ private:
     std::string server_ip_;
     uint16_t server_port_;
     std::shared_ptr<TcpSocket> socket_ptr_;
+    std::atomic<bool> is_connected_;
 
 public:
     TcpClient();
@@ -26,6 +27,8 @@ public:
 
     bool SendMsg(const std::string msg);
     bool RecvMsg(std::string *msg);
+
+    bool IsConnected() const;
 
     void Close();
 

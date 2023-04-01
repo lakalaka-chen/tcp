@@ -5,7 +5,7 @@ namespace tcp {
 
 int TcpClient::retry_interval = 200;
 
-TcpClient::TcpClient(): socket_ptr_(nullptr), server_port_(0) {
+TcpClient::TcpClient(): socket_ptr_(nullptr), server_port_(0), is_connected_(false) {
     fd_ = socket(AF_INET, SOCK_STREAM, 0);
 };
 
@@ -29,6 +29,11 @@ void TcpClient::Close() {
     if (socket_ptr_ != nullptr) {
         socket_ptr_.reset();
     }
+    is_connected_.store(false);
+}
+
+bool TcpClient::IsConnected() const {
+    return is_connected_.load();
 }
 
 bool TcpClient::ConnectTo(const std::string &ip, uint16_t port, int retry, bool async) {
@@ -76,22 +81,13 @@ bool TcpClient::ConnectTo(const std::string &ip, uint16_t port, int retry, bool 
     if (code >= 0) {
         spdlog::info("Connect Success! ");
         socket_ptr_ = std::make_shared<TcpSocket>(fd_);
+        is_connected_.store(true);
         return true;
     } else {
         spdlog::error("Connect Failed! ");
         close(fd_);
         return false;
     }
-
-//    code = connect(fd_, (struct sockaddr*)&address, sizeof(address));
-//    if (code < 0) {
-//        spdlog::error("Failed to connect. ");
-//        close(fd_);
-//        return false;
-//    }
-//    spdlog::debug("Connect to {}:{}", ip, port);
-//    socket_ptr_ = std::make_shared<TcpSocket>(fd_);
-//    return true;
 }
 
 }

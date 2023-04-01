@@ -97,6 +97,7 @@ void TcpServer::stop() {
     is_running_.store(false, std::memory_order_release);
     if (server_fd_ > 0){
         close(server_fd_);
+        server_fd_ = 0;
         spdlog::info("{} closed", name_);
     }
 }

@@ -208,4 +208,12 @@ TEST(MultiClientTest, Test1) {
 }
 
 
+/// 在服务器和客户端通信时, 关闭服务器, 查看是否会出问题
+TEST(CloseTest, TEST1) {
+    spdlog::set_level(spdlog::level::debug);
+    TcpServer server("SERVER", 8888);
+    server.Start();
+}
+
+
 }

@@ -1,6 +1,17 @@
 #include "tcp_server.h"
 
+#include <random>
+
 namespace tcp {
+
+
+uint16_t RandomPort() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<uint16_t> dis(1100, 54321);
+    return dis(gen);
+}
+
 
 /** TcpServer **/
 
@@ -18,14 +29,14 @@ bool TcpServer::Start() {
             socklen_t addr_len = sizeof(client_addr);
             int client_fd = accept(server_fd_, (struct sockaddr*)(&client_addr), &addr_len);
             if (client_fd < 0) {
-                spdlog::warn("Failed to accept connection");
+//                spdlog::warn("Failed to accept connection");
                 break;
             }
 
             char ip[32];
             const char *client_ip = inet_ntop(AF_INET, &(client_addr.sin_addr.s_addr), ip, sizeof(ip));
             uint16_t port = ntohs(client_addr.sin_port);
-            spdlog::debug("Incoming: [{}:{}]", client_ip, port);
+//            spdlog::debug("Incoming: [{}:{}]", client_ip, port);
 
             std::shared_ptr<TcpSocket> socket_ptr = std::make_shared<TcpSocket>(client_fd);
             std::shared_ptr<TcpHandler> handler_ptr(new TcpHandler(socket_ptr, ip, port, func_));
@@ -35,7 +46,7 @@ bool TcpServer::Start() {
             }, std::move(handler_ptr));
             handler_thread.detach();
         }
-        spdlog::debug("Server main thread exited");
+//        spdlog::debug("Server main thread exited");
     });
 
 
@@ -65,7 +76,7 @@ bool TcpServer::init() {
         return false;
     }
 
-    spdlog::info("Server start listening [{}]. ", port_);
+//    spdlog::info("Server start listening [{}]. ", port_);
     return true;
 }
 
@@ -98,7 +109,7 @@ void TcpServer::stop() {
     if (server_fd_ > 0){
         close(server_fd_);
         server_fd_ = 0;
-        spdlog::info("{} closed", name_);
+//        spdlog::info("{} closed", name_);
     }
 }
 

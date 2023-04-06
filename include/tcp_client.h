@@ -17,6 +17,7 @@ private:
     uint16_t server_port_;
     std::shared_ptr<TcpSocket> socket_ptr_;
     std::atomic<bool> is_connected_;
+    std::mutex send_mutex_;
 
 public:
     TcpClient();

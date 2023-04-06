@@ -14,13 +14,18 @@ TcpClient::~TcpClient() {
 }
 
 bool TcpClient::SendMsg(const std::string msg) {
-    assert(socket_ptr_ != nullptr);
+    std::unique_lock<std::mutex> lock(send_mutex_);
+    if (socket_ptr_ == nullptr) {
+        return false;
+    }
     int n_send = socket_ptr_->Write(msg);
     return n_send >= 0;
 }
 
 bool TcpClient::RecvMsg(std::string *msg) {
-    assert(socket_ptr_ != nullptr);
+    if (socket_ptr_ == nullptr) {
+        return false;
+    }
     int n_recv = socket_ptr_->Read(msg);
     return n_recv >= 0;
 }
@@ -56,7 +61,7 @@ bool TcpClient::ConnectTo(const std::string &ip, uint16_t port, int retry, bool 
             std::this_thread::sleep_for(std::chrono::milliseconds(TcpClient::retry_interval));
             fd_ = TcpSocket::CreateSocket();
             code = connect(fd_, (struct sockaddr*)&address, sizeof(address));
-            spdlog::info("Connecting  [{}:{}] ... ", ip, port);
+//            spdlog::info("Connecting  [{}:{}] ... ", ip, port);
             if (code < 0) {
                 close(fd_);
                 continue;
@@ -69,7 +74,7 @@ bool TcpClient::ConnectTo(const std::string &ip, uint16_t port, int retry, bool 
             std::this_thread::sleep_for(std::chrono::milliseconds(TcpClient::retry_interval));
             fd_ = TcpSocket::CreateSocket();
             code = connect(fd_, (struct sockaddr*)&address, sizeof(address));
-            spdlog::info("Connecting  [{}:{}] ... ", ip, port);
+//            spdlog::info("Connecting  [{}:{}] ... ", ip, port);
             if (code < 0) {
                 close(fd_);
             } else {
@@ -79,12 +84,12 @@ bool TcpClient::ConnectTo(const std::string &ip, uint16_t port, int retry, bool 
     }
 
     if (code >= 0) {
-        spdlog::info("Connect Success! ");
+//        spdlog::info("Connect Success! ");
         socket_ptr_ = std::make_shared<TcpSocket>(fd_);
         is_connected_.store(true);
         return true;
     } else {
-        spdlog::error("Connect Failed! ");
+//        spdlog::error("Connect Failed! ");
         close(fd_);
         return false;
     }

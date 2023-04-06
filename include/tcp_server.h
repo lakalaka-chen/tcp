@@ -15,6 +15,9 @@
 namespace tcp {
 
 
+uint16_t RandomPort();
+
+
 class TcpServer: public std::enable_shared_from_this<TcpServer> {
 
 protected:

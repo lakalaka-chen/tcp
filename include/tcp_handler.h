@@ -11,11 +11,13 @@ const HandlerFunc default_func = [](const std::string &recv, std::string &reply)
 class TcpServer;
 
 class TcpHandler {
+    friend class TcpServer;
 private:
     HandlerFunc func_;
     std::shared_ptr<TcpSocket> socket_;     // 和客户端通信
     std::string client_ip_;
     uint16_t client_port_;
+    std::string server_name_;
 
 
 public:

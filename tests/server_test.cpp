@@ -40,7 +40,7 @@ private:
 
 class Double2ServerTest: public testing::Test {
 public:
-    static const uint16_t port = 8888;
+    static const uint16_t port = 5678;
     Double2ServerTest(): server_(new TcpServer("Echo Twice Server", Double2ServerTest::port)) {
         spdlog::set_level(spdlog::level::debug);
         server_->HandleReceiveData([](const std::string &recv_msg, std::string &reply_msg){
@@ -140,7 +140,8 @@ TEST_F(EchoTwiceHandlerTest, SimpleEcho) {
 
 TEST(RawServerTest, SimpleTest) {
     spdlog::set_level(spdlog::level::debug);
-    TcpServer server("Simple", 9999);
+    uint16_t port = RandomPort();
+    TcpServer server("Simple", port);
     server.Start();
 
     if (!server.IsRunning()) {
@@ -155,7 +156,7 @@ TEST(RawServerTest, SimpleTest) {
     std::thread client_thread([&](){
         std::unique_lock<std::mutex> lock(mu);
         TcpClient client;
-        client.ConnectTo("127.0.0.1", 9999);
+        client.ConnectTo("127.0.0.1", port);
         std::string send_msg = "nihao";
         std::string recv_msg;
         client.SendMsg(send_msg);
@@ -177,7 +178,8 @@ TEST(RawServerTest, SimpleTest) {
 
 TEST(MultiClientTest, Test1) {
     spdlog::set_level(spdlog::level::debug);
-    TcpServer server("Simple", 6666);
+    uint16_t port = RandomPort();
+    TcpServer server("Simple", port);
     server.Start();
 
     if (!server.IsRunning()) {
@@ -191,7 +193,7 @@ TEST(MultiClientTest, Test1) {
     for (int i = 0; i < 100; i ++) {
         std::thread client_thread([&](){
             TcpClient client;
-            client.ConnectTo("127.0.0.1", 6666);
+            client.ConnectTo("127.0.0.1", port);
             std::string send_msg = std::to_string(i);
             std::string recv_msg;
             client.SendMsg(send_msg);

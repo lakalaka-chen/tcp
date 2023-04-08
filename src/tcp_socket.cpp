@@ -1,5 +1,6 @@
 
 #include "tcp_socket.h"
+#include <future>
 
 namespace tcp {
 
@@ -7,8 +8,10 @@ int TcpSocket::CreateSocket()  {
     return socket(AF_INET, SOCK_STREAM, 0);
 }
 
+
 int TcpSocket::Read(std::string *msg) {
     int len = 0;
+
     int n_read = read_((char*)&len, 4); // 先读取消息长度
     if (n_read < 0) {
         return -1;
@@ -29,6 +32,8 @@ int TcpSocket::Read(std::string *msg) {
     return len;
 }
 
+
+
 int TcpSocket::Write(const std::string &msg) {
     char *data = new char[msg.size() + 4];
     uint32_t msg_size = htonl(msg.size());
@@ -36,18 +41,16 @@ int TcpSocket::Write(const std::string &msg) {
     std::memcpy(data+4, msg.data(), msg.size());
 
     int data_size = msg.size() + 4;
+
     int n_write = write_(data, data_size);
     delete[] data;
     return n_write;
 }
 
 
+TcpSocket::TcpSocket(int fd): socket_fd_(fd) {
 
-
-TcpSocket::TcpSocket(int fd): socket_fd_(fd) {}
-TcpSocket::~TcpSocket() {}
-
-void TcpSocket::Close() { close(socket_fd_); }
+}
 
 
 int TcpSocket::write_(const char* data, int data_size) {
@@ -81,5 +84,8 @@ int TcpSocket::read_(char *buf, int to_read) {
 }
 
 
+TcpSocket::~TcpSocket() {}
+
+void TcpSocket::Close() { close(socket_fd_); }
 
 }

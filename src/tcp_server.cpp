@@ -40,6 +40,7 @@ bool TcpServer::Start() {
 
             std::shared_ptr<TcpSocket> socket_ptr = std::make_shared<TcpSocket>(client_fd);
             std::shared_ptr<TcpHandler> handler_ptr(new TcpHandler(socket_ptr, ip, port, func_));
+            handler_ptr->server_name_ = name_;
 
             std::thread handler_thread([](std::shared_ptr<TcpHandler> handler){
                 handler->StartWorking();

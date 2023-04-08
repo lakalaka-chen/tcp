@@ -11,10 +11,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 set(INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}/include
-        ${PROJECT_SOURCE_DIR}/third_party/spdlog/include
+#        ${PROJECT_SOURCE_DIR}/third_party/spdlog/include
         ${PROJECT_SOURCE_DIR}/third_party/googletest/googletest/include)
 
-include_directories(${INCLUDE_DIR})
+
+include_directories(${INCLUDE_DIR} "~/CppSources/spdlog/include" "~/CppSources/include")
+link_directories("~/CppSources/libs")
 include_directories(BEFORE src)
 
 

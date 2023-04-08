@@ -5,6 +5,7 @@
 #include <cstring>
 #include <string>
 #include <unistd.h>
+#include <mutex>
 
 
 namespace tcp {
@@ -24,6 +25,7 @@ public:
     int GetSocketFd() const { return socket_fd_; }
 
 private:
+
     int write_(const char* data, int data_size);
     int read_(char *buf, int to_read);
 };

@@ -16,11 +16,15 @@ void TcpHandler::StartWorking() {
             break;
         } else if (n_read < 0) {
 //            spdlog::warn("Failed to receive data. ");
-            break;
+//            break;
         }
 //        spdlog::debug("[{}:{}:{} Bytes]: {}", client_ip_, client_port_, n_read, recv_msg);
 
         func_(recv_msg, reply_msg);
+        if (reply_msg == "") {
+            spdlog::debug("结点[{}]拒绝回复", server_name_);
+            continue; // 构造空的reply message, 表示忽略这次收到的数据包
+        }
         int n_reply = socket_->Write(reply_msg);
         if (n_reply < 0) {
 //            spdlog::warn("Failed to reply. ");

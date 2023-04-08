@@ -13,8 +13,7 @@ TcpClient::~TcpClient() {
     Close();
 }
 
-bool TcpClient::SendMsg(const std::string msg) {
-    std::unique_lock<std::mutex> lock(send_mutex_);
+bool TcpClient::SendMsg(const std::string msg, int timeout) {
     if (socket_ptr_ == nullptr) {
         return false;
     }
@@ -22,12 +21,26 @@ bool TcpClient::SendMsg(const std::string msg) {
     return n_send >= 0;
 }
 
-bool TcpClient::RecvMsg(std::string *msg) {
-    if (socket_ptr_ == nullptr) {
-        return false;
+bool TcpClient::RecvMsg(std::string *msg, int timeout) {
+//    {
+//        std::unique_lock<std::mutex> lock(mu_);
+//        cv_.notify_all();  // 结束以前没有做完的SendMsg, RecvMsg
+//    }
+    std::unique_lock<std::mutex> lock(mu_);
+    std::future<bool> fut = std::async(std::launch::async, [this, msg, timeout](){
+        if (socket_ptr_ == nullptr) {
+            return false;
+        }
+        int n_recv = socket_ptr_->Read(msg);
+        return n_recv >= 0;
+    });
+    // lock至少在这里会被锁住timeout毫秒
+    // 或者提前有数据来, 完成socket_ptr->Read(msg)
+    std::future_status status = fut.wait_for(std::chrono::milliseconds(timeout));
+    if (status == std::future_status::ready) {
+        return fut.get();
     }
-    int n_recv = socket_ptr_->Read(msg);
-    return n_recv >= 0;
+    return false;
 }
 
 void TcpClient::Close() {

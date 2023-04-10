@@ -14,6 +14,7 @@ TcpClient::~TcpClient() {
 }
 
 bool TcpClient::SendMsg(const std::string msg, int timeout) {
+//    std::unique_lock<std::mutex> lock(mu_);
     if (socket_ptr_ == nullptr) {
         return false;
     }
@@ -22,10 +23,7 @@ bool TcpClient::SendMsg(const std::string msg, int timeout) {
 }
 
 bool TcpClient::RecvMsg(std::string *msg, int timeout) {
-//    {
-//        std::unique_lock<std::mutex> lock(mu_);
-//        cv_.notify_all();  // 结束以前没有做完的SendMsg, RecvMsg
-//    }
+
     std::unique_lock<std::mutex> lock(mu_);
     std::future<bool> fut = std::async(std::launch::async, [this, msg, timeout](){
         if (socket_ptr_ == nullptr) {

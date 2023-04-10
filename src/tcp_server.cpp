@@ -29,25 +29,23 @@ bool TcpServer::Start() {
             socklen_t addr_len = sizeof(client_addr);
             int client_fd = accept(server_fd_, (struct sockaddr*)(&client_addr), &addr_len);
             if (client_fd < 0) {
-//                spdlog::warn("Failed to accept connection");
                 break;
             }
 
             char ip[32];
             const char *client_ip = inet_ntop(AF_INET, &(client_addr.sin_addr.s_addr), ip, sizeof(ip));
             uint16_t port = ntohs(client_addr.sin_port);
-//            spdlog::debug("Incoming: [{}:{}]", client_ip, port);
 
             std::shared_ptr<TcpSocket> socket_ptr = std::make_shared<TcpSocket>(client_fd);
             std::shared_ptr<TcpHandler> handler_ptr(new TcpHandler(socket_ptr, ip, port, func_));
             handler_ptr->server_name_ = name_;
 
-            std::thread handler_thread([](std::shared_ptr<TcpHandler> handler){
-                handler->StartWorking();
-            }, std::move(handler_ptr));
+            std::thread handler_thread([handler_ptr](){
+                handler_ptr->StartWorking();
+            });
             handler_thread.detach();
+            handlers_[client_fd] = handler_ptr;
         }
-//        spdlog::debug("Server main thread exited");
     });
 
 
@@ -60,6 +58,9 @@ bool TcpServer::init() {
         spdlog::error("Failed to create socket. ");
         return false;
     }
+
+    // 启动SO_REUSEADDR选项
+
 
     struct sockaddr_in address;
     memset(&address, 0, sizeof(address));
@@ -91,9 +92,6 @@ TcpServer::TcpServer(std::string name, uint16_t port, size_t capacity)
 
 TcpServer::~TcpServer() {
     Close();
-    if (main_thread_.joinable()) {
-        main_thread_.join();
-    }
 }
 
 bool TcpServer::IsRunning() {
@@ -105,18 +103,29 @@ void TcpServer::HandleReceiveData(std::function<void(const std::string &, std::s
 }
 
 
-void TcpServer::stop() {
+void TcpServer::stopAccept() {
     is_running_.store(false, std::memory_order_release);
     if (server_fd_ > 0){
         close(server_fd_);
         server_fd_ = 0;
-//        spdlog::info("{} closed", name_);
+    }
+}
+
+void TcpServer::disconnectHandlers() {
+    for (auto it = handlers_.begin(); it != handlers_.end(); it ++) {
+        if (it->second) {
+            it->second->Disconnect();
+        }
     }
 }
 
 
 bool TcpServer::Close() {
-    stop();
+    stopAccept();
+    disconnectHandlers();
+    if (main_thread_.joinable()) {
+        main_thread_.join();
+    }
     return true;
 }
 

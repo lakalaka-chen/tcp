@@ -8,6 +8,7 @@
 #include <sys/poll.h>
 #include <arpa/inet.h>
 #include <functional>
+#include <unordered_map>
 
 #include "tcp_socket.h"
 #include "tcp_handler.h"
@@ -17,6 +18,7 @@ namespace tcp {
 
 uint16_t RandomPort();
 
+using TcpHandlerPtr = std::shared_ptr<TcpHandler>;
 
 class TcpServer: public std::enable_shared_from_this<TcpServer> {
 
@@ -28,6 +30,7 @@ protected:
     size_t capacity_;                   // 最大接收的客户端连接数量
     int server_fd_;
     std::thread main_thread_;           // 接收客户端的线程, 但是不处理
+    std::unordered_map<int, TcpHandlerPtr> handlers_;
 
 public:
     explicit TcpServer(std::string name, uint16_t port, size_t capacity=128);
@@ -45,7 +48,8 @@ public:
 
 protected:
     bool init();
-    void stop();
+    void stopAccept();
+    void disconnectHandlers();
 };
 
 }

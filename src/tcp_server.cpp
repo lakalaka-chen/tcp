@@ -115,8 +115,10 @@ void TcpServer::disconnectHandlers() {
     for (auto it = handlers_.begin(); it != handlers_.end(); it ++) {
         if (it->second) {
             it->second->Disconnect();
+            it->second.reset();
         }
     }
+    handlers_.clear();
 }
 
 

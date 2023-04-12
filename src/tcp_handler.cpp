@@ -12,7 +12,7 @@ void TcpHandler::StartWorking() {
     while (is_running_.load()) {
         int n_read = socket_->Read(&recv_msg);
         if (n_read == 0) {
-//            spdlog::debug("Client closed connection. ");
+//            spdlog::debug("客户端关闭连接");
             break;
         } else if (n_read < 0) {
 //            spdlog::warn("Failed to receive data. ");
@@ -31,6 +31,7 @@ void TcpHandler::StartWorking() {
         }
     }
     socket_->Close();
+    spdlog::debug("服务器的Handler结束工作");
 }
 
 }
